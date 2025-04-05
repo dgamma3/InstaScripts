@@ -59,7 +59,7 @@ export default class SetName extends Component {
 
 	sock_start () {
 
-		this.socket = io("http://localhost:3001");
+		this.socket = io(app.settings.ws_conf.loc.SOCKET__io.u);
 
 		this.socket.on('connect', function(data) {
 			// console.log('socket connected', data)
@@ -186,7 +186,7 @@ export default class SetName extends Component {
 		// setTimeout(this.turn_comp.bind(this), rand_to_fro(500, 1000));
 
 		this.state.cell_vals = cell_vals
-
+		this.props.onRecordHistory(cell_vals)
 		this.check_turn()
 	}
 
@@ -215,7 +215,6 @@ export default class SetName extends Component {
 
 		this.state.cell_vals = cell_vals
 
-		//this.record_history(cell_vals)
 		this.props.onRecordHistory(cell_vals)
 		this.check_turn()
 	}
