@@ -33,8 +33,6 @@ export default class SetName extends Component {
 				game_play: true,
 				game_stat: 'Start game',
 				history: [],
-				opponentDisconnected:false,
-
 			}
 		else {
 			this.sock_start()
@@ -45,7 +43,6 @@ export default class SetName extends Component {
 				game_play: false,
 				game_stat: 'Connecting',
 				history: [],
-				opponentDisconnected: false,
 			}
 		}
 	}
@@ -81,16 +78,6 @@ export default class SetName extends Component {
 			})
 
 		}.bind(this));
-
-		this.socket.on('player_disconnected', function(data) {
-			this.socket && this.socket.disconnect();
-			this.setState({
-				opponentDisconnected: true,
-			})
-
-
-		}.bind(this));
-
 
 		this.socket.on('opp_turn', this.turn_opp_live.bind(this));
 
@@ -133,7 +120,7 @@ export default class SetName extends Component {
 					{this.state.game_play && <div id="game_turn_msg">{this.state.next_turn_ply ? 'Your turn' : 'Opponent turn'}</div>}
 				</div>
 
-				{!this.state.opponentDisconnected ? (<div id="game_board">
+				<div id="game_board">
 						<table>
 							<tbody>
 							<tr>
@@ -154,7 +141,6 @@ export default class SetName extends Component {
 							</tbody>
 						</table>
 					</div>
-				) : <div>You win as the opponent has disconnected</div>}
 
 				<button type='submit' onClick={this.end_game.bind(this)} className='button'><span>End Game <span className='fa fa-caret-right'></span></span></button>
 
