@@ -186,7 +186,6 @@ export default class SetName extends Component {
 		// setTimeout(this.turn_comp.bind(this), rand_to_fro(500, 1000));
 
 		this.state.cell_vals = cell_vals
-		this.props.onRecordHistory(cell_vals)
 		this.check_turn()
 	}
 
