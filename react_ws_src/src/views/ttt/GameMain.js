@@ -31,7 +31,10 @@ export default class SetName extends Component {
 				cell_vals: {},
 				next_turn_ply: true,
 				game_play: true,
-				game_stat: 'Start game'
+				game_stat: 'Start game',
+				history: [],
+				opponentDisconnected:false,
+
 			}
 		else {
 			this.sock_start()
@@ -40,7 +43,9 @@ export default class SetName extends Component {
 				cell_vals: {},
 				next_turn_ply: true,
 				game_play: false,
-				game_stat: 'Connecting'
+				game_stat: 'Connecting',
+				history: [],
+				opponentDisconnected: false,
 			}
 		}
 	}
@@ -48,8 +53,8 @@ export default class SetName extends Component {
 //	------------------------	------------------------	------------------------
 
 	componentDidMount () {
-    	TweenMax.from('#game_stat', 1, {display: 'none', opacity: 0, scaleX:0, scaleY:0, ease: Power4.easeIn})
-    	TweenMax.from('#game_board', 1, {display: 'none', opacity: 0, x:-200, y:-200, scaleX:0, scaleY:0, ease: Power4.easeIn})
+		TweenMax.from('#game_stat', 1, {display: 'none', opacity: 0, scaleX:0, scaleY:0, ease: Power4.easeIn})
+		TweenMax.from('#game_board', 1, {display: 'none', opacity: 0, x:-200, y:-200, scaleX:0, scaleY:0, ease: Power4.easeIn})
 	}
 
 //	------------------------	------------------------	------------------------
@@ -57,16 +62,16 @@ export default class SetName extends Component {
 
 	sock_start () {
 
-		this.socket = io(app.settings.ws_conf.loc.SOCKET__io.u);
+		this.socket = io("http://localhost:3001");
 
-		this.socket.on('connect', function(data) { 
+		this.socket.on('connect', function(data) {
 			// console.log('socket connected', data)
 
 			this.socket.emit('new player', { name: app.settings.curr_user.name });
 
 		}.bind(this));
 
-		this.socket.on('pair_players', function(data) { 
+		this.socket.on('pair_players', function(data) {
 			// console.log('paired with ', data)
 
 			this.setState({
@@ -74,6 +79,15 @@ export default class SetName extends Component {
 				game_play: true,
 				game_stat: 'Playing with ' + data.opp.name
 			})
+
+		}.bind(this));
+
+		this.socket.on('player_disconnected', function(data) {
+			this.socket && this.socket.disconnect();
+			this.setState({
+				opponentDisconnected: true,
+			})
+
 
 		}.bind(this));
 
@@ -98,9 +112,9 @@ export default class SetName extends Component {
 		const { cell_vals } = this.state
 
 		return (<div>
-		        	{cell_vals && cell_vals[c]=='x' && <i className="fa fa-times fa-5x"></i>}
-					{cell_vals && cell_vals[c]=='o' && <i className="fa fa-circle-o fa-5x"></i>}
-				</div>)
+			{cell_vals && cell_vals[c]=='x' && <i className="fa fa-times fa-5x"></i>}
+			{cell_vals && cell_vals[c]=='o' && <i className="fa fa-circle-o fa-5x"></i>}
+		</div>)
 	}
 
 //	------------------------	------------------------	------------------------
@@ -119,27 +133,28 @@ export default class SetName extends Component {
 					{this.state.game_play && <div id="game_turn_msg">{this.state.next_turn_ply ? 'Your turn' : 'Opponent turn'}</div>}
 				</div>
 
-				<div id="game_board">
-					<table>
-					<tbody>
-						<tr>
-							<td id='game_board-c1' ref='c1' onClick={this.click_cell.bind(this)}> {this.cell_cont('c1')} </td>
-							<td id='game_board-c2' ref='c2' onClick={this.click_cell.bind(this)} className="vbrd"> {this.cell_cont('c2')} </td>
-							<td id='game_board-c3' ref='c3' onClick={this.click_cell.bind(this)}> {this.cell_cont('c3')} </td>
-						</tr>
-						<tr>
-							<td id='game_board-c4' ref='c4' onClick={this.click_cell.bind(this)} className="hbrd"> {this.cell_cont('c4')} </td>
-							<td id='game_board-c5' ref='c5' onClick={this.click_cell.bind(this)} className="vbrd hbrd"> {this.cell_cont('c5')} </td>
-							<td id='game_board-c6' ref='c6' onClick={this.click_cell.bind(this)} className="hbrd"> {this.cell_cont('c6')} </td>
-						</tr>
-						<tr>
-							<td id='game_board-c7' ref='c7' onClick={this.click_cell.bind(this)}> {this.cell_cont('c7')} </td>
-							<td id='game_board-c8' ref='c8' onClick={this.click_cell.bind(this)} className="vbrd"> {this.cell_cont('c8')} </td>
-							<td id='game_board-c9' ref='c9' onClick={this.click_cell.bind(this)}> {this.cell_cont('c9')} </td>
-						</tr>
-					</tbody>
-					</table>
-				</div>
+				{!this.state.opponentDisconnected ? (<div id="game_board">
+						<table>
+							<tbody>
+							<tr>
+								<td id='game_board-c1' ref='c1' onClick={this.click_cell.bind(this)}> {this.cell_cont('c1')} </td>
+								<td id='game_board-c2' ref='c2' onClick={this.click_cell.bind(this)} className="vbrd"> {this.cell_cont('c2')} </td>
+								<td id='game_board-c3' ref='c3' onClick={this.click_cell.bind(this)}> {this.cell_cont('c3')} </td>
+							</tr>
+							<tr>
+								<td id='game_board-c4' ref='c4' onClick={this.click_cell.bind(this)} className="hbrd"> {this.cell_cont('c4')} </td>
+								<td id='game_board-c5' ref='c5' onClick={this.click_cell.bind(this)} className="vbrd hbrd"> {this.cell_cont('c5')} </td>
+								<td id='game_board-c6' ref='c6' onClick={this.click_cell.bind(this)} className="hbrd"> {this.cell_cont('c6')} </td>
+							</tr>
+							<tr>
+								<td id='game_board-c7' ref='c7' onClick={this.click_cell.bind(this)}> {this.cell_cont('c7')} </td>
+								<td id='game_board-c8' ref='c8' onClick={this.click_cell.bind(this)} className="vbrd"> {this.cell_cont('c8')} </td>
+								<td id='game_board-c9' ref='c9' onClick={this.click_cell.bind(this)}> {this.cell_cont('c9')} </td>
+							</tr>
+							</tbody>
+						</table>
+					</div>
+				) : <div>You win as the opponent has disconnected</div>}
 
 				<button type='submit' onClick={this.end_game.bind(this)} className='button'><span>End Game <span className='fa fa-caret-right'></span></span></button>
 
@@ -197,7 +212,7 @@ export default class SetName extends Component {
 		let empty_cells_arr = []
 
 
-		for (let i=1; i<=9; i++) 
+		for (let i=1; i<=9; i++)
 			!cell_vals['c'+i] && empty_cells_arr.push('c'+i)
 		// console.log(cell_vals, empty_cells_arr, rand_arr_elem(empty_cells_arr))
 
@@ -214,6 +229,8 @@ export default class SetName extends Component {
 
 		this.state.cell_vals = cell_vals
 
+		//this.record_history(cell_vals)
+		this.props.onRecordHistory(cell_vals)
 		this.check_turn()
 	}
 
@@ -290,13 +307,13 @@ export default class SetName extends Component {
 		}
 
 
-		for (let i=1; i<=9; i++) 
+		for (let i=1; i<=9; i++)
 			!cell_vals['c'+i] && (fin = false)
 
 		// win && console.log('win set: ', set)
 
 		if (win) {
-		
+
 			this.refs[set[0]].classList.add('win')
 			this.refs[set[1]].classList.add('win')
 			this.refs[set[2]].classList.add('win')
@@ -312,7 +329,7 @@ export default class SetName extends Component {
 			this.socket && this.socket.disconnect();
 
 		} else if (fin) {
-		
+
 			this.setState({
 				game_stat: 'Draw',
 				game_play: false
@@ -327,7 +344,7 @@ export default class SetName extends Component {
 				next_turn_ply: !this.state.next_turn_ply
 			})
 		}
-		
+
 	}
 
 //	------------------------	------------------------	------------------------
@@ -339,5 +356,15 @@ export default class SetName extends Component {
 	}
 
 
+	record_history(gameBoard) {
+		this.setState(function(prevState) {
+			// Create a shallow copy of the history array using slice
+			var history = prevState.history.slice();
+			// Append the current gameBoard state
+			history.push(gameBoard);
+			// Return the new state
+			return { history: history };
+		});
+	}
 
 }
