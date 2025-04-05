@@ -81,6 +81,8 @@ function onClientDisconnect() {
 	players.splice(players.indexOf(removePlayer), 1);
 	players_avail.splice(players_avail.indexOf(removePlayer), 1);
 
+	io.to(players[0].sockid).emit("player_disconnected");
+
 
 	if (this.status == "admin") {
 		util.log("Admin has disconnected: "+this.uid);
